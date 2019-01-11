@@ -1,0 +1,22 @@
+# At least REGISTRY_USER and REGISTRY_PASSWORD should be defined in
+# the Travis job settings
+
+language: minimal
+before_script:
+  - |
+    docker run -d \
+      -e REGISTRY_USER=${REGISTRY_USER} \
+      -e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+      --name build \
+      --privileged \
+      -v $(pwd):/mnt/workspace \
+      grayhemp/build:master \
+      sleep 300
+script:
+  - docker exec -it build make
+deploy:
+  provider: script
+  script:
+    - docker exec -it build make push
+  on:
+    branch: master
